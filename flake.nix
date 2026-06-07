@@ -31,6 +31,7 @@
               anthropic         # ДОБАВЛЕНО: SDK для работы ИИ-агента
               mcp               # ДОБАВЛЕНО: Базовый протокол Model Context Protocol
               rich              # ДОБАВЛЕНО: Форматирование логов сервера
+              openai            # ДОБАВЛЕНО: Решает ошибку импорта и AttributeError
             ];
 
             nativeBuildInputs = [ pkgs.makeWrapper ];
