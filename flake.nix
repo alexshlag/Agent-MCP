@@ -6,9 +6,15 @@
     utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, utils }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      utils,
+    }:
     let
-      systemOutputs = utils.lib.eachDefaultSystem (system:
+      systemOutputs = utils.lib.eachDefaultSystem (
+        system:
         let
           pkgs = import nixpkgs { inherit system; };
         in
@@ -27,11 +33,19 @@
               uvicorn
               requests
               pydantic
-              python-dotenv     # ДОБАВЛЕНО: Решает ошибку "No module named 'dotenv'"
-              anthropic         # ДОБАВЛЕНО: SDK для работы ИИ-агента
-              mcp               # ДОБАВЛЕНО: Базовый протокол Model Context Protocol
-              rich              # ДОБАВЛЕНО: Форматирование логов сервера
-              openai            # ДОБАВЛЕНО: Решает ошибку импорта и AttributeError
+              python-dotenv # ДОБАВЛЕНО: Решает ошибку "No module named 'dotenv'"
+              anthropic # ДОБАВЛЕНО: SDK для работы ИИ-агента
+              mcp # ДОБАВЛЕНО: Базовый протокол Model Context Protocol
+              rich # ДОБАВЛЕНО: Форматирование логов сервера
+              openai # ДОБАВЛЕНО: Решает ошибку импорта и AttributeError
+              sqlite-vec
+
+              anyio
+              starlette
+              jinja2
+              httpx
+              mcp
+
             ];
 
             nativeBuildInputs = [ pkgs.makeWrapper ];
@@ -57,13 +71,22 @@
           };
 
           apps.default = utils.lib.mkApp { drv = self.packages.${system}.default; };
-        });
+        }
+      );
     in
-    systemOutputs // {
-      nixosModules.default = { config, lib, pkgs, ... }: 
+    systemOutputs
+    // {
+      nixosModules.default =
+        {
+          config,
+          lib,
+          pkgs,
+          ...
+        }:
         let
           cfg = config.services.agent-mcp;
-        in {
+        in
+        {
           options.services.agent-mcp = {
             enable = lib.mkEnableOption "Agent-MCP Server";
           };
