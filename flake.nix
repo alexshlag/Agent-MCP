@@ -22,11 +22,19 @@
 
             # Зависимости, которые Nix подтянет из репозитория
             propagatedBuildInputs = with pkgs.python313Packages; [
+              anyio
               click
-              fastapi
+              openai
+              starlette
               uvicorn
+              jinja2
+              python-dotenv
+              sqlite-vec
+              httpx
+              tabulate
+              pyperclip
+              mcp
               requests
-              pydantic
             ];
 
             # Вручную копируем файлы проекта в Nix-стор и создаем бинарник-обертку
