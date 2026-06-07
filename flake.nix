@@ -1,8 +1,8 @@
 {
-  description = "NixOS Flake для RAG-сервера Agent-MCP с корректным импортом зависимостей";
+  description = "NixOS Flake для RAG-сервера Agent-MCP со всеми зависимостями";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     utils.url = "github:numtide/flake-utils";
   };
 
@@ -20,13 +20,17 @@
 
             format = "other";
 
-            # Эти пакеты NixOS скачает и положит в изолированные папки python313Packages
+            # Полный список системных Python-пакетов, необходимых для работы сервера
             propagatedBuildInputs = with pkgs.python313Packages; [
               click
               fastapi
               uvicorn
               requests
               pydantic
+              python-dotenv     # ДОБАВЛЕНО: Решает ошибку "No module named 'dotenv'"
+              anthropic         # ДОБАВЛЕНО: SDK для работы ИИ-агента
+              mcp               # ДОБАВЛЕНО: Базовый протокол Model Context Protocol
+              rich              # ДОБАВЛЕНО: Форматирование логов сервера
             ];
 
             nativeBuildInputs = [ pkgs.makeWrapper ];
@@ -34,15 +38,11 @@
             installPhase = ''
               runHook preInstall
 
-              # 1. Создаем структуру директорий в Nix-сторе
               mkdir -p $out/${pkgs.python313.sitePackages}/agent_mcp
               mkdir -p $out/bin
 
-              # 2. Копируем исходный код
               cp -r agent_mcp/* $out/${pkgs.python313.sitePackages}/agent_mcp/
 
-              # 3. КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Мы явно собираем пути до ВСЕХ зависимостей 
-              # из propagatedBuildInputs (включая click, fastapi и т.д.) и передаем их в PYTHONPATH
               makeWrapper ${pkgs.python313}/bin/python $out/bin/agent-mcp \
                 --add-flags "-m agent_mcp.cli" \
                 --prefix PYTHONPATH : "$out/${pkgs.python313.sitePackages}" \
